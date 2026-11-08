@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+  RUSTDOCFLAGS: -D warnings
+  CARGO_HACK_VERSION: 0.6.46
+  CARGO_DENY_VERSION: 0.20.2
+  TAPLO_VERSION: 0.10.0
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install
+      - run: cargo fmt --all --check
+
+  taplo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install
+      - run: cargo install --locked taplo-cli --version "$TAPLO_VERSION"
+      - run: taplo fmt --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install
+      - run: cargo clippy --workspace --all-targets --all-features --locked
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install
+      - run: cargo test --workspace --all-features --locked
+      - run: cargo doc --workspace --all-features --no-deps --locked
+
+  features:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install
+      - run: cargo install --locked cargo-hack --version "$CARGO_HACK_VERSION"
+      - run: cargo hack clippy --workspace --exclude sigroot-nostd-check --each-feature --no-dev-deps --locked
+      - run: cargo hack check --workspace --exclude sigroot-nostd-check --feature-powerset --depth 2 --no-dev-deps --locked
+
+  no-std:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install
+      - run: cargo install --locked cargo-hack --version "$CARGO_HACK_VERSION"
+      - run: cargo hack check --workspace --exclude sigroot-nostd-check --each-feature --exclude-features std --target thumbv7em-none-eabihf --locked
+      - run: cargo build -p sigroot-nostd-check --release --target thumbv7em-none-eabihf --locked
+      - run: ls -l target/thumbv7em-none-eabihf/release/sigroot-nostd-check
+
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: echo "MSRV=$(sed -n 's/^rust-version = "\(.*\)"/\1/p' Cargo.toml)" >> "$GITHUB_ENV"
+      - run: rustup toolchain install "$MSRV" --profile minimal
+      - run: cargo +"$MSRV" check --workspace --all-features --locked
+
+  deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup toolchain install
+      - run: cargo install --locked cargo-deny --version "$CARGO_DENY_VERSION"
+      - run: cargo deny --locked check

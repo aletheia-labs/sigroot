@@ -112,6 +112,13 @@ sigroot-eth = { version = "0.1", default-features = false, features = ["mnemonic
 sigroot-eth = { version = "0.1", default-features = false, features = ["tx-eip1559", "policy"] }
 ```
 
+## Development
+
+```sh
+cargo install --locked taplo-cli --version 0.10.0
+lefthook install
+```
+
 ## License
 
 [MIT](LICENSE). Copyright (c) 2026 aletheia-labs.

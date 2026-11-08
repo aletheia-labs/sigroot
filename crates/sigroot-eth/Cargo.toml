@@ -1,0 +1,19 @@
+[package]
+name = "sigroot-eth"
+description = "Ethereum addresses, keys, transactions, and offline signing for sigroot."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+sigroot-core.workspace = true
+
+[features]
+alloc = ["sigroot-core/alloc"]
+std = ["alloc", "sigroot-core/std"]
+
+[lints]
+workspace = true

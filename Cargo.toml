@@ -1,0 +1,47 @@
+[workspace]
+members = ["crates/*", "tools/*"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85.0"
+license = "MIT"
+repository = "https://github.com/aletheia-labs/sigroot"
+publish = false
+
+[workspace.dependencies]
+sigroot-core = { path = "crates/sigroot-core", version = "0.1.0", default-features = false }
+sigroot-hd = { path = "crates/sigroot-hd", version = "0.1.0", default-features = false }
+sigroot-eth = { path = "crates/sigroot-eth", version = "0.1.0", default-features = false }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+unreachable_pub = "deny"
+rust_2018_idioms = { level = "deny", priority = -1 }
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+dbg_macro = "deny"
+indexing_slicing = "deny"
+arithmetic_side_effects = "deny"
+cast_possible_truncation = "deny"
+cast_possible_wrap = "deny"
+cast_sign_loss = "deny"
+std_instead_of_core = "deny"
+std_instead_of_alloc = "deny"
+alloc_instead_of_core = "deny"
+missing_errors_doc = "deny"
+missing_panics_doc = "deny"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+overflow-checks = true
