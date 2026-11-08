@@ -1,0 +1,21 @@
+glob_matcher: doublestar
+
+pre-commit:
+  piped: true
+  jobs:
+    - name: format rust
+      glob: "**/*.rs"
+      run: cargo fmt --all
+      stage_fixed: true
+    - name: format toml
+      glob: "**/*.toml"
+      run: taplo fmt
+      stage_fixed: true
+
+pre-push:
+  piped: true
+  jobs:
+    - name: fmt check
+      run: cargo fmt --all --check && taplo fmt --check
+    - name: clippy
+      run: cargo clippy --workspace --all-targets --all-features --locked

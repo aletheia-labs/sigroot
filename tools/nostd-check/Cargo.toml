@@ -1,0 +1,14 @@
+[package]
+name = "sigroot-nostd-check"
+description = "Links sigroot into a bare-metal binary without a global allocator."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+sigroot-core.workspace = true
+sigroot-hd = { workspace = true, features = ["bip32", "bip39"] }
+sigroot-eth.workspace = true
