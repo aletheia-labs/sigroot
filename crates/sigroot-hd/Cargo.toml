@@ -9,13 +9,27 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+hmac = { workspace = true, optional = true }
+k256 = { workspace = true, optional = true, features = ["arithmetic"] }
+pbkdf2 = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
 sigroot-core.workspace = true
+unicode-normalization = { workspace = true, optional = true }
+zeroize = { workspace = true, optional = true }
+
+[dev-dependencies]
+sha2.workspace = true
 
 [features]
-bip32 = []
-bip39 = []
+bip32 = ["dep:hmac", "dep:k256", "dep:sha2", "dep:zeroize"]
+bip39 = ["dep:hmac", "dep:pbkdf2", "dep:sha2", "dep:zeroize"]
+nfkd = ["bip39", "alloc", "dep:unicode-normalization"]
 alloc = ["sigroot-core/alloc"]
 std = ["alloc", "sigroot-core/std"]
+
+[[test]]
+name = "hd"
+required-features = ["bip32", "bip39"]
 
 [lints]
 workspace = true

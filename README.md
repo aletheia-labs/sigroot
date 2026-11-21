@@ -2,7 +2,7 @@
 
 A modular Rust wallet core for offline signing and multichain self-custody.
 
-> **Status: pre-alpha.** Not implemented, not audited, not for use with real assets.
+> **Status: pre-alpha.** Not audited, not for use with real assets.
 
 ## Vision
 
@@ -23,7 +23,7 @@ Today nothing can be trusted by default: not dependencies, not toolchains, not b
 
 ## `no_std` and size
 
-Every crate is unconditionally `#![no_std]`. All functionality works without an allocator; `alloc` and `std` only add conveniences on top.
+Every crate is unconditionally `#![no_std]`. All functionality works without an allocator, except Unicode passphrases (`nfkd`): normalization itself never allocates, but its tables come from a crate that links `alloc`. Otherwise `alloc` and `std` only add conveniences on top.
 
 - Fixed-size types for keys, signatures, and addresses.
 - Decoding borrows from the input; encoding writes into a caller-provided buffer; hashing is streamed.
@@ -32,6 +32,12 @@ Every crate is unconditionally `#![no_std]`. All functionality works without an 
 - Dependencies are used with `default-features = false`.
 
 CI builds every non-`alloc` feature for a bare-metal target and links a minimal binary without a global allocator. Code size of each feature is measured and tracked.
+
+## Memory hygiene
+
+Secrets live in containers that zeroize on drop, intermediate scalars are wrapped in `Zeroizing`, and `hmac` and `sha2` are built with `zeroize`, so hash and HMAC states are cleared on drop.
+
+Not covered: stack temporaries inside dependencies (for example the padded HMAC key in `hmac`, intermediate digests in `digest`, internals of `k256`) and copies made by the compiler. RustCrypto does not zeroize stack data by design ([RustCrypto/MACs#255](https://github.com/RustCrypto/MACs/issues/255)). Where this matters, call [`zeroize::zeroize_stack`](https://docs.rs/zeroize/latest/zeroize/fn.zeroize_stack.html) after the sensitive operation, from a wrapper that is not inlined. This is best effort only.
 
 ## Crates
 
@@ -56,31 +62,34 @@ L3  eip191   tx-legacy   tx-eip2930   tx-eip1559
 L2  keys  ──  hd  ──  mnemonic
 L1  pubkey   verify
 L0  address
-    (always)  Signer trait, ChainId, errors
+    (always)  ChainId, U256, Signature, errors
 ```
 
 ### Features of `sigroot-eth`
 
 | Feature | Provides | Implies |
 | --- | --- | --- |
-| *(none)* | `Signer` trait, `ChainId`, errors. | |
+| *(none)* | `ChainId`, `U256`, `Signature` with low-`s` enforcement, errors. | |
 | `address` | `Address`, EIP-55 encode, parse, validate. | |
 | `pubkey` | secp256k1 public keys, address derivation. | `address` |
-| `verify` | Signature parsing, low-`s` enforcement, recovery, verification. | `pubkey` |
+| `verify` | Public key recovery and signature verification. | `pubkey` |
 | `keys` | In-memory `SigningKey` implementing `Signer`. | `pubkey` |
 | `hd` | Derivation according to a wallet profile. | `keys` |
 | `mnemonic` | BIP-39 generation and import. | `hd` |
+| `nfkd` | Unicode passphrases, NFKD normalized in a zeroized stack buffer. | `mnemonic`, `alloc` |
 | `eip191` | `personal_sign` payloads. | |
-| `tx-legacy` | Legacy transactions, EIP-155 only. | |
-| `tx-eip2930` | Type 1 transactions. | |
-| `tx-eip1559` | Type 2 transactions. | |
-| `erc20` | Interpretation of `transfer`, `transferFrom`, `approve`. | |
-| `policy` | Chain ID, recipient, value, fee, and contract-call rules checked before signing. | |
-| `unchecked-prehash` | `sign_prehash` over a raw 32-byte digest. Bypasses interpretation and policy. | `keys` |
-| `alloc` | Owned convenience types, Unicode passphrase normalization. | |
+| `tx-legacy` | Legacy transactions, EIP-155 only. | `address` |
+| `tx-eip2930` | Type 1 transactions. | `address` |
+| `tx-eip1559` | Type 2 transactions. | `address` |
+| `erc20` | Interpretation of `transfer`, `transferFrom`, `approve`. | `address` |
+| `policy` | Chain ID, recipient, value, fee, and contract-call rules checked before signing. | `erc20` |
+| `unchecked-prehash` | Payload over a raw 32-byte digest. Bypasses interpretation and policy. | `keys` |
+| `alloc` | Owned convenience types. | |
 | `std` | `OsEntropy` backed by the operating system. | `alloc` |
 
-Each `tx-*` feature encodes, decodes, hashes, and assembles signed transactions.
+Each `tx-*` feature encodes, decodes, hashes, and assembles signed transactions. Decoding accepts only canonical RLP up to 128 KiB.
+
+`Signer` and `Payload` are available once any payload feature (`eip191`, `tx-*`, `unchecked-prehash`) is enabled.
 
 ### Signing
 
@@ -90,7 +99,7 @@ Each `tx-*` feature encodes, decodes, hashes, and assembles signed transactions.
 
 | Parameter | Value |
 | --- | --- |
-| Mnemonic | BIP-39, English, 24 words, optional passphrase (ASCII only without `alloc`) |
+| Mnemonic | BIP-39, English, 24 words, optional passphrase (ASCII only without `nfkd`) |
 | Derivation | BIP-32, secp256k1 |
 | Path | `m/44'/60'/0'/0/{index}` |
 | Address | Keccak-256 of the uncompressed public key, last 20 bytes, EIP-55 |
@@ -117,6 +126,13 @@ sigroot-eth = { version = "0.1", default-features = false, features = ["tx-eip15
 ```sh
 cargo install --locked taplo-cli --version 0.10.0
 lefthook install
+```
+
+Tests check sigroot against unmodified upstream test vectors, mainnet transactions, and independent implementations (libsecp256k1, tiny-keccak, Parity `rlp`). Dependency audits are tracked with `cargo vet`:
+
+```sh
+cargo install --locked cargo-vet --version 0.10.3
+cargo vet
 ```
 
 ## License

@@ -11,4 +11,18 @@ publish.workspace = true
 [dependencies]
 sigroot-core.workspace = true
 sigroot-hd = { workspace = true, features = ["bip32", "bip39"] }
-sigroot-eth.workspace = true
+sigroot-eth = { workspace = true, features = [
+	"address",
+	"pubkey",
+	"verify",
+	"keys",
+	"hd",
+	"mnemonic",
+	"eip191",
+	"tx-legacy",
+	"tx-eip2930",
+	"tx-eip1559",
+	"erc20",
+	"policy",
+	"unchecked-prehash",
+] }

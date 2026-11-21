@@ -1,0 +1,8 @@
+
+# cargo-vet audits file
+
+[[audits.zeroize]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+delta = "1.9.1 -> 1.9.2"
+notes = "Delta review of 1.9.2: optimized bulk zeroization via asm barrier or volatile fill; barrier on non-asm targets simplified to core::hint::black_box; new zeroize_bytes API. Reviewed unsafe in bulk.rs and call sites in lib.rs."

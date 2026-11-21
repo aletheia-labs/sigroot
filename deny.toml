@@ -9,6 +9,14 @@ yanked = "deny"
 version = 2
 allow = ["MIT"]
 confidence-threshold = 0.95
+exceptions = [
+	{ crate = "subtle", allow = [
+		"BSD-3-Clause",
+	] },
+	{ crate = "unicode-normalization", allow = [
+		"Unicode-3.0",
+	] },
+]
 
 [bans]
 multiple-versions = "deny"

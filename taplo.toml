@@ -1,2 +1,4 @@
+exclude = ["supply-chain/*.toml"]
+
 [formatting]
 indent_string = "\t"

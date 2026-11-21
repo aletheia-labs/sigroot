@@ -8,9 +8,13 @@ license.workspace = true
 repository.workspace = true
 publish.workspace = true
 
+[dependencies]
+getrandom = { workspace = true, optional = true }
+zeroize.workspace = true
+
 [features]
 alloc = []
-std = ["alloc"]
+std = ["alloc", "dep:getrandom"]
 
 [lints]
 workspace = true
