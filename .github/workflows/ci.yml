@@ -67,8 +67,8 @@ jobs:
           persist-credentials: false
       - run: rustup toolchain install
       - run: cargo install --locked cargo-hack --version "$CARGO_HACK_VERSION"
-      - run: cargo hack clippy --workspace --exclude sigroot-nostd-check --each-feature --no-dev-deps --locked
-      - run: cargo hack check --workspace --exclude sigroot-nostd-check --feature-powerset --depth 2 --no-dev-deps --locked
+      - run: cargo hack clippy --workspace --exclude sigroot-nostd-check --each-feature --locked
+      - run: cargo hack check --workspace --exclude sigroot-nostd-check --feature-powerset --depth 2 --locked
 
   no-std:
     runs-on: ubuntu-latest

@@ -9,11 +9,54 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+hmac = { workspace = true, optional = true }
+k256 = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
+sha3 = { workspace = true, optional = true }
 sigroot-core.workspace = true
+sigroot-hd = { workspace = true, optional = true }
+zeroize = { workspace = true, optional = true }
+
+[dev-dependencies]
+rlp.workspace = true
+secp256k1 = { workspace = true, features = ["recovery"] }
+tiny-keccak = { workspace = true, features = ["keccak"] }
 
 [features]
-alloc = ["sigroot-core/alloc"]
-std = ["alloc", "sigroot-core/std"]
+address = ["dep:sha3"]
+pubkey = ["address", "dep:k256", "k256/arithmetic"]
+verify = ["pubkey", "k256/ecdsa"]
+keys = ["pubkey", "k256/ecdsa", "dep:hmac", "dep:sha2", "dep:zeroize"]
+hd = ["keys", "dep:sigroot-hd", "sigroot-hd/bip32"]
+mnemonic = ["hd", "sigroot-hd/bip39"]
+nfkd = ["mnemonic", "alloc", "sigroot-hd/nfkd"]
+eip191 = ["dep:sha3"]
+tx-legacy = ["address"]
+tx-eip2930 = ["address"]
+tx-eip1559 = ["address"]
+erc20 = ["address"]
+policy = ["erc20"]
+unchecked-prehash = ["keys"]
+alloc = ["sigroot-core/alloc", "sigroot-hd?/alloc"]
+std = ["alloc", "sigroot-core/std", "sigroot-hd?/std"]
+
+[[test]]
+name = "eth"
+required-features = [
+	"address",
+	"pubkey",
+	"verify",
+	"keys",
+	"hd",
+	"mnemonic",
+	"eip191",
+	"tx-legacy",
+	"tx-eip2930",
+	"tx-eip1559",
+	"erc20",
+	"policy",
+	"unchecked-prehash",
+]
 
 [lints]
 workspace = true
