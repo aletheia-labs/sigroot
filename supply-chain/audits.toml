@@ -1,6 +1,102 @@
 
 # cargo-vet audits file
 
+[[audits.base16ct]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "1.0.0"
+notes = "Constant-time-ish hex encode/decode. Unsafe only from_utf8_unchecked after encode produces ASCII hex nibbles."
+
+[[audits.block-buffer]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.12.1"
+notes = "MaybeUninit block buffer for digests. Unsafe for init/pos/copy under Eager/Lazy invariants and ResetGuard; no I/O."
+
+[[audits.cmov]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.5.4"
+notes = "Constant-time conditional move. Soft masks plus arch asm (arm/riscv) and slice cast helpers; no I/O."
+
+[[audits.cpubits]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.1.1"
+notes = "Compile-time word-size selection macros (cfg_if-style). No unsafe; no I/O or ambient capabilities."
+
+[[audits.crypto-common]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.2.2"
+notes = "Trait/type aliases for crypto primitives. forbid(unsafe_code); no I/O."
+
+[[audits.hmac]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.13.0"
+notes = "HMAC via digest block API and SimpleHmac. No unsafe; key derivation pads/hashes to block size."
+
+[[audits.keccak]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.2.2"
+notes = "Keccak-f permutation. Soft/SIMD backends safe; aarch64 SHA3 uses NEON intrinsics behind cpufeatures gate."
+
+[[audits.pbkdf2]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.13.0"
+notes = "PBKDF2 PRF loop (HMAC). No unsafe; optional PHC/MCF string APIs."
+
+[[audits.rfc6979]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.6.0"
+notes = "RFC6979 deterministic k via HMAC_DRBG. No unsafe; depends on hmac/digest/crypto-bigint for crypto primitives."
+
+[[audits.rlp]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-run"
+version = "0.6.1"
+notes = "Parity RLP encode/decode. No unsafe; pure parsing over bytes buffers."
+
+[[audits.rustc-hex]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-run"
+version = "2.1.0"
+notes = "Simple hex encode/decode. No unsafe; no ambient capabilities beyond optional std Error impl."
+
+[[audits.sha3]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.12.0"
+notes = "SHA-3/Keccak wrappers over keccak + sponge-cursor. forbid(unsafe_code)."
+
+[[audits.signature]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "3.0.0"
+notes = "Digital signature traits. forbid(unsafe_code); no ambient capabilities."
+
+[[audits.sponge-cursor]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.1.0"
+notes = "Sponge absorb/squeeze cursor. Unsafe limited to LE byte views of [u64;N] and unreachable_unchecked behind RATE/pos invariants; const asserts on RATE."
+
+[[audits.tiny-keccak]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-run"
+version = "2.0.2"
+notes = "Keccak sponge. Unsafe limited to LE transmute of [u64;25] to bytes and XOR pointer loop with length assert."
+
+[[audits.wnaf]]
+who = "Cezary Olborski <cezary.olborski@gmail.com>"
+criteria = "safe-to-deploy"
+version = "0.14.1"
+notes = "wNAF table/form for elliptic-curve scalar mul. forbid(unsafe_code); pure arithmetic over group/primefield."
+
 [[audits.zeroize]]
 who = "Cezary Olborski <cezary.olborski@gmail.com>"
 criteria = "safe-to-deploy"
