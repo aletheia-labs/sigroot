@@ -58,5 +58,9 @@ required-features = [
 	"unchecked-prehash",
 ]
 
+[[example]]
+name = "offline_signer"
+required-features = ["mnemonic", "tx-eip1559", "policy", "verify"]
+
 [lints]
 workspace = true

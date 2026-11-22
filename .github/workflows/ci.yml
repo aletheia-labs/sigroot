@@ -60,6 +60,7 @@ jobs:
       - run: cargo test --workspace --all-features --locked
       - run: cargo test -p sigroot-hd --features bip32,bip39 --locked
       - run: cargo test -p sigroot-eth --features address,pubkey,verify,keys,hd,mnemonic,eip191,tx-legacy,tx-eip2930,tx-eip1559,erc20,policy,unchecked-prehash --locked
+      - run: cargo run -p sigroot-eth --example offline_signer --features mnemonic,tx-eip1559,policy,verify --locked
       - run: cargo doc --workspace --all-features --no-deps --locked
 
   features:
