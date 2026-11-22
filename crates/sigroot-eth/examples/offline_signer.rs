@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
 		max_fee: Some(500_000_000_000_000),
 		calls: Calls::Deny,
 	};
-	policy.check(&tx).map_err(|violation| format!("policy: {violation:?}"))?;
+	policy.check(&tx)?;
 
 	let payload = Payload::Eip1559(&tx);
 	let signature = key.sign(payload)?;

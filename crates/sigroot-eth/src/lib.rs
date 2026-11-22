@@ -130,7 +130,7 @@ macro_rules! impl_tx {
 			/// Returns an error if the transaction cannot be encoded.
 			#[cfg(feature = "alloc")]
 			pub fn unsigned_to_vec(&self) -> Result<alloc::vec::Vec<u8>, crate::Error> {
-				let mut out = alloc::vec::Vec::new();
+				let mut out = alloc::vec::Vec::with_capacity(self.unsigned_len()?);
 				self.write_unsigned(&mut out)?;
 				Ok(out)
 			}
@@ -145,7 +145,7 @@ macro_rules! impl_tx {
 				&self,
 				signature: &crate::Signature,
 			) -> Result<alloc::vec::Vec<u8>, crate::Error> {
-				let mut out = alloc::vec::Vec::new();
+				let mut out = alloc::vec::Vec::with_capacity(self.signed_len(signature)?);
 				self.write_signed(signature, &mut out)?;
 				Ok(out)
 			}

@@ -13,8 +13,7 @@ getrandom = { workspace = true, optional = true }
 zeroize.workspace = true
 
 [features]
-alloc = []
-std = ["alloc", "dep:getrandom"]
+std = ["dep:getrandom"]
 
 [lints]
 workspace = true
