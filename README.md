@@ -23,7 +23,7 @@ Today nothing can be trusted by default: not dependencies, not toolchains, not b
 
 ## `no_std` and size
 
-Every crate is unconditionally `#![no_std]`. All functionality works without an allocator, except Unicode passphrases (`nfkd`): normalization itself never allocates, but its tables come from a crate that links `alloc`. Otherwise `alloc` and `std` only add conveniences on top.
+Every crate is unconditionally `#![no_std]`. All functionality works without an allocator, except Unicode passphrases (`nfkd`): normalization itself never allocates, but its tables come from a crate that links `alloc`. In `sigroot-eth`, `alloc` and `std` only add conveniences on top (`OsEntropy` and owned encodings).
 
 - Fixed-size types for keys, signatures, and addresses.
 - Decoding borrows from the input; encoding writes into a caller-provided buffer; hashing is streamed.

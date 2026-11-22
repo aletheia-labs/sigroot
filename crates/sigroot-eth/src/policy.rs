@@ -1,3 +1,5 @@
+use core::fmt;
+
 use crate::{Address, ChainId, Erc20Call, Transaction, U256};
 
 /// Rules a transaction must satisfy before signing.
@@ -54,6 +56,24 @@ pub enum Violation {
 	/// Unlimited `approve`.
 	UnlimitedApproval,
 }
+
+impl fmt::Display for Violation {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		f.write_str(match self {
+			Self::ChainId => "chain id not allowed",
+			Self::Fee => "fee above limit",
+			Self::Value => "value not allowed",
+			Self::ContractCreation => "contract creation not allowed",
+			Self::ContractCall => "contract call not allowed",
+			Self::Recipient => "recipient not allowed",
+			Self::Token => "token not allowed",
+			Self::Approve => "approve not allowed",
+			Self::UnlimitedApproval => "unlimited approve not allowed",
+		})
+	}
+}
+
+impl core::error::Error for Violation {}
 
 impl Policy<'_> {
 	/// Checks `tx` against this policy.

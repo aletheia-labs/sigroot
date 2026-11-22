@@ -37,8 +37,8 @@ tx-eip1559 = ["address"]
 erc20 = ["address"]
 policy = ["erc20"]
 unchecked-prehash = ["keys"]
-alloc = ["sigroot-core/alloc", "sigroot-hd?/alloc"]
-std = ["alloc", "sigroot-core/std", "sigroot-hd?/std"]
+alloc = []
+std = ["alloc", "sigroot-core/std"]
 
 [[test]]
 name = "eth"
