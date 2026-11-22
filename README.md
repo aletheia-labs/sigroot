@@ -31,7 +31,7 @@ Every crate is unconditionally `#![no_std]`. All functionality works without an 
 - Errors implement `core::error::Error`.
 - Dependencies are used with `default-features = false`.
 
-CI builds every non-`alloc` feature for a bare-metal target and links a minimal binary without a global allocator. Code size of each feature is measured and tracked.
+CI builds every non-`alloc` feature for a bare-metal target and links a minimal binary without a global allocator.
 
 ## Memory hygiene
 
@@ -119,6 +119,15 @@ sigroot-eth = { version = "0.1", default-features = false, features = ["mnemonic
 
 # External signer integration
 sigroot-eth = { version = "0.1", default-features = false, features = ["tx-eip1559", "policy"] }
+```
+
+### Offline signing example
+
+`examples/offline_signer.rs` walks through one public-data API demo: build an EIP-1559 transfer, check an explicit policy, sign, verify, and round-trip the encoding. It uses a well-known BIP-39 test mnemonic and is not a wallet.
+
+```sh
+cargo run -p sigroot-eth --example offline_signer \
+  --features mnemonic,tx-eip1559,policy,verify
 ```
 
 ## Development
