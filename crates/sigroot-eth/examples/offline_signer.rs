@@ -14,13 +14,11 @@
 use sigroot_eth::hd::{self, Mnemonic};
 use sigroot_eth::{AccessList, Address, Calls, ChainId, Eip1559Tx, Payload, Policy, Signer, U256};
 
-/// Public BIP-39 test mnemonic (24 words): 23× `abandon` + `art`.
 const TEST_MNEMONIC: &str = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon art";
 
 /// Account 0 at `m/44'/60'/0'/0/0` for [`TEST_MNEMONIC`] with an empty passphrase.
 ///
-/// Published by [ZKNoxHQ/PQBIP39](https://github.com/ZKNoxHQ/PQBIP39) for this mnemonic and path
-/// (checksummed here with EIP-55).
+/// Published by [ZKNoxHQ/PQBIP39](https://github.com/ZKNoxHQ/PQBIP39) for this mnemonic and path.
 const EXPECTED_ADDRESS: &str = "0xF278cF59F82eDcf871d630F28EcC8056f25C1cdb";
 
 fn main() -> Result<(), Box<dyn core::error::Error>> {
@@ -45,7 +43,7 @@ fn main() -> Result<(), Box<dyn core::error::Error>> {
 		access_list: AccessList::EMPTY,
 	};
 
-	// Policy limits are chosen independently of the transaction fields above.
+	// A policy derived from the transaction would approve its own input.
 	let allowed_chains = [ChainId::new(1)?];
 	let allowed_recipients = [Address::parse("0x3535353535353535353535353535353535353535")?];
 	let policy = Policy {

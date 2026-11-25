@@ -23,7 +23,7 @@ Today nothing can be trusted by default: not dependencies, not toolchains, not b
 
 ## `no_std` and size
 
-Every crate is unconditionally `#![no_std]`. All functionality works without an allocator, except Unicode passphrases (`nfkd`): normalization itself never allocates, but its tables come from a crate that links `alloc`. In `sigroot-eth`, `alloc` and `std` only add conveniences on top (`OsEntropy` and owned encodings).
+Every crate is unconditionally `#![no_std]`. All functionality works without an allocator, except Unicode passphrases (`nfkd`), which link `alloc`. In `sigroot-eth`, `alloc` and `std` only add conveniences on top (`OsEntropy` and owned encodings).
 
 - Fixed-size types for keys, signatures, and addresses.
 - Decoding borrows from the input; encoding writes into a caller-provided buffer; hashing is streamed.
@@ -31,13 +31,13 @@ Every crate is unconditionally `#![no_std]`. All functionality works without an 
 - Errors implement `core::error::Error`.
 - Dependencies are used with `default-features = false`.
 
-CI builds every non-`alloc` feature for a bare-metal target and links a minimal binary without a global allocator.
+CI builds every non-`std` feature for a bare-metal target and links a minimal binary without a global allocator. For fixed profiles (`address`, `offline`, `full`) it measures `.text` + `.rodata` + `.data` in that binary — code and initialized data in the measurement binary, not a finished firmware image — and fails if the sum exceeds the committed upper limit in `tools/nostd-check/size-limits.tsv`.
 
 ## Memory hygiene
 
 Secrets live in containers that zeroize on drop, intermediate scalars are wrapped in `Zeroizing`, and `hmac` and `sha2` are built with `zeroize`, so hash and HMAC states are cleared on drop.
 
-Not covered: stack temporaries inside dependencies (for example the padded HMAC key in `hmac`, intermediate digests in `digest`, internals of `k256`) and copies made by the compiler. RustCrypto does not zeroize stack data by design ([RustCrypto/MACs#255](https://github.com/RustCrypto/MACs/issues/255)). Where this matters, call [`zeroize::zeroize_stack`](https://docs.rs/zeroize/latest/zeroize/fn.zeroize_stack.html) after the sensitive operation, from a wrapper that is not inlined. This is best effort only.
+Not covered: stack temporaries inside dependencies (for example the padded HMAC key in `hmac` ([RustCrypto/MACs#255](https://github.com/RustCrypto/MACs/issues/255)), intermediate digests in `digest`, internals of `k256`) and copies made by the compiler. Where this matters, call [`zeroize::zeroize_stack`](https://docs.rs/zeroize/latest/zeroize/fn.zeroize_stack.html) after the sensitive operation, from a wrapper that is not inlined. This is best effort only.
 
 ## Crates
 
@@ -47,7 +47,7 @@ Not covered: stack temporaries inside dependencies (for example the padded HMAC 
 | `sigroot-hd` | BIP-39 mnemonics and BIP-32 secp256k1 derivation. |
 | `sigroot-eth` | Ethereum: addresses, keys, signing payloads, transactions, interpretation, policy. |
 
-Cargo features are unified across the dependency graph, so they are used to reduce what gets compiled, never as a security boundary. Check the effective feature set with `cargo tree -e features`.
+Cargo unifies features across the dependency graph, so they reduce what gets compiled but are not a security boundary. Check the effective feature set with `cargo tree -e features`.
 
 ## Ethereum
 
@@ -93,7 +93,7 @@ Each `tx-*` feature encodes, decodes, hashes, and assembles signed transactions.
 
 ### Signing
 
-`Signer` accepts only typed payloads, never raw bytes. Each payload type carries its own domain, so a transaction cannot be signed as a message or the other way around. External and hardware signers implement the same trait; the private key never has to leave them.
+`Signer` accepts only typed payloads, never raw bytes. Each payload type carries its own signing domain, so a transaction cannot be signed as a message or the other way around. The exception is `unchecked-prehash`, which signs any 32-byte digest. External and hardware signers implement the same trait; the private key never has to leave them.
 
 ### Wallet profile `eth-bip44-v1`
 

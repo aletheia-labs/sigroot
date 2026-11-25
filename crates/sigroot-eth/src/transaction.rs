@@ -1,6 +1,6 @@
 use crate::{Address, ChainId, U256};
 
-/// Fields shared by supported transaction types, as checked by policy.
+/// Fields shared by supported transaction types.
 pub trait Transaction {
 	/// Chain the transaction is valid on.
 	fn chain_id(&self) -> ChainId;

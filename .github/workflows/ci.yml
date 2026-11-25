@@ -81,10 +81,10 @@ jobs:
         with:
           persist-credentials: false
       - run: rustup toolchain install
+      - run: rustup component add llvm-tools-preview
       - run: cargo install --locked cargo-hack --version "$CARGO_HACK_VERSION"
       - run: cargo hack check --workspace --exclude sigroot-nostd-check --each-feature --exclude-features std --target thumbv7em-none-eabihf --locked
-      - run: cargo build -p sigroot-nostd-check --release --target thumbv7em-none-eabihf --locked
-      - run: ls -l target/thumbv7em-none-eabihf/release/sigroot-nostd-check
+      - run: bash tools/nostd-check/check-sizes.sh
 
   msrv:
     runs-on: ubuntu-latest
