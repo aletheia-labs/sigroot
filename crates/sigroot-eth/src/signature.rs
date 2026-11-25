@@ -9,7 +9,7 @@ const HALF_ORDER: [u8; 32] = [
 	0x5d, 0x57, 0x6e, 0x73, 0x57, 0xa4, 0x50, 0x1d, 0xdf, 0xe9, 0x2f, 0x46, 0x68, 0x1b, 0x20, 0xa0,
 ];
 
-/// Recoverable secp256k1 signature with low `s`, as required by EIP-2.
+/// Recoverable secp256k1 signature with low `s` (EIP-2).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Signature {
 	r: [u8; 32],

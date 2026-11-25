@@ -10,19 +10,30 @@ publish.workspace = true
 
 [dependencies]
 sigroot-core.workspace = true
-sigroot-hd = { workspace = true, features = ["bip32", "bip39"] }
-sigroot-eth = { workspace = true, features = [
-	"address",
-	"pubkey",
-	"verify",
-	"keys",
-	"hd",
-	"mnemonic",
-	"eip191",
-	"tx-legacy",
-	"tx-eip2930",
-	"tx-eip1559",
-	"erc20",
-	"policy",
-	"unchecked-prehash",
-] }
+sigroot-eth = { workspace = true }
+
+[features]
+default = ["full"]
+# Size profiles built one at a time (`--no-default-features --features <name>`).
+address = ["sigroot-eth/address"]
+offline = [
+	"sigroot-eth/mnemonic",
+	"sigroot-eth/tx-eip1559",
+	"sigroot-eth/policy",
+	"sigroot-eth/verify",
+]
+full = [
+	"sigroot-eth/address",
+	"sigroot-eth/pubkey",
+	"sigroot-eth/verify",
+	"sigroot-eth/keys",
+	"sigroot-eth/hd",
+	"sigroot-eth/mnemonic",
+	"sigroot-eth/eip191",
+	"sigroot-eth/tx-legacy",
+	"sigroot-eth/tx-eip2930",
+	"sigroot-eth/tx-eip1559",
+	"sigroot-eth/erc20",
+	"sigroot-eth/policy",
+	"sigroot-eth/unchecked-prehash",
+]

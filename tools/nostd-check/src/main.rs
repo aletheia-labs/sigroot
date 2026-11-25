@@ -3,17 +3,21 @@
 use core::hint::black_box;
 
 use sigroot_core as _;
-use sigroot_eth::{
-	AccessList, Address, Calls, ChainId, Eip1559Tx, Eip2930Tx, Erc20Call, Error, LegacyTx, Payload,
-	PersonalMessage, Policy, Signer, U256, UncheckedPrehash, hd,
-};
-use sigroot_hd as _;
 
-const PHRASE: &str = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon \
-	abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon \
-	abandon art";
+#[cfg(not(any(feature = "address", feature = "offline", feature = "full")))]
+compile_error!("enable one size profile: address, offline, or full");
 
-fn run() -> Result<usize, Error> {
+#[cfg(feature = "full")]
+fn run() -> Result<usize, sigroot_eth::Error> {
+	use sigroot_eth::{
+		AccessList, Address, Calls, ChainId, Eip1559Tx, Eip2930Tx, Erc20Call, Error, LegacyTx,
+		Payload, PersonalMessage, Policy, Signer, U256, UncheckedPrehash, hd,
+	};
+
+	const PHRASE: &str = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon \
+		abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon \
+		abandon art";
+
 	let mnemonic = hd::Mnemonic::parse(black_box(PHRASE))?;
 	let key = hd::derive_from_mnemonic(&mnemonic, black_box(""), black_box(0))?;
 	let recipient = key.address();
@@ -86,6 +90,58 @@ fn run() -> Result<usize, Error> {
 	key.sign(Payload::UncheckedPrehash(&UncheckedPrehash(black_box([1; 32]))))?;
 
 	Ok(black_box(len))
+}
+
+#[cfg(all(feature = "offline", not(feature = "full")))]
+fn run() -> Result<usize, sigroot_eth::Error> {
+	use sigroot_eth::{
+		AccessList, Address, Calls, ChainId, Eip1559Tx, Payload, Policy, Signer, U256, hd,
+	};
+
+	const PHRASE: &str = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon \
+		abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon \
+		abandon art";
+
+	let mnemonic = hd::Mnemonic::parse(black_box(PHRASE))?;
+	let key = hd::derive_from_mnemonic(&mnemonic, black_box(""), black_box(0))?;
+	let recipient = Address::parse(black_box("0x3535353535353535353535353535353535353535"))?;
+	let chain_id = ChainId::new(black_box(1))?;
+	let tx = Eip1559Tx {
+		chain_id,
+		nonce: black_box(0),
+		max_priority_fee_per_gas: black_box(1_000_000_000),
+		max_fee_per_gas: black_box(20_000_000_000),
+		gas_limit: black_box(21_000),
+		to: Some(recipient),
+		value: U256::from(black_box(1_000_000_000_000_000_000_u128)),
+		input: &[],
+		access_list: AccessList::EMPTY,
+	};
+	let chains = [chain_id];
+	let recipients = [recipient];
+	let policy = Policy {
+		chain_ids: &chains,
+		recipients: Some(&recipients),
+		max_value: Some(U256::from(black_box(2_000_000_000_000_000_000_u128))),
+		max_fee: Some(black_box(500_000_000_000_000)),
+		calls: Calls::Deny,
+	};
+	policy.check(&tx).map_err(|_| sigroot_eth::Error::Unsupported)?;
+
+	let signature = key.sign(Payload::Eip1559(&tx))?;
+	key.public_key().verify(Payload::Eip1559(&tx), &signature)?;
+	let mut buf = [0; 256];
+	let len = tx.encode_signed(&signature, &mut buf)?;
+	let encoded = buf.get(..len).ok_or(sigroot_eth::Error::BufferTooSmall)?;
+	Ok(black_box(encoded).len())
+}
+
+#[cfg(all(feature = "address", not(feature = "offline"), not(feature = "full")))]
+fn run() -> Result<usize, sigroot_eth::Error> {
+	use sigroot_eth::{Address, Error};
+
+	let address = Address::parse(black_box("0xF278cF59F82eDcf871d630F28EcC8056f25C1cdb"))?;
+	Ok(black_box(usize::from(*address.as_bytes().first().ok_or(Error::InvalidLength)?)))
 }
 
 #[cfg(target_os = "none")]
