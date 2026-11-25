@@ -31,7 +31,7 @@ Every crate is unconditionally `#![no_std]`. All functionality works without an 
 - Errors implement `core::error::Error`.
 - Dependencies are used with `default-features = false`.
 
-CI builds every non-`std` feature for a bare-metal target and links a minimal binary without a global allocator. For fixed profiles (`address`, `offline`, `full`) it measures `.text` + `.rodata` + `.data` in that binary — code and initialized data in the measurement binary, not a finished firmware image — and fails if the sum exceeds the committed upper limit in `tools/nostd-check/size-limits.tsv`.
+CI builds every non-`std` feature for a bare-metal target and links a check binary that uses every allocator-free feature without a global allocator. It reports that binary's size with `llvm-size`; the size is not a finished firmware image and is not checked against a limit.
 
 ## Memory hygiene
 

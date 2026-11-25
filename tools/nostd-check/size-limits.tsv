@@ -1,4 +1,0 @@
-# profile	limit (.text + .rodata + .data) for thumbv7em-none-eabihf release
-address	3554
-offline	129310
-full	146122

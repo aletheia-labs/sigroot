@@ -84,7 +84,11 @@ jobs:
       - run: rustup component add llvm-tools-preview
       - run: cargo install --locked cargo-hack --version "$CARGO_HACK_VERSION"
       - run: cargo hack check --workspace --exclude sigroot-nostd-check --each-feature --exclude-features std --target thumbv7em-none-eabihf --locked
-      - run: bash tools/nostd-check/check-sizes.sh
+      - run: cargo build -p sigroot-nostd-check --release --target thumbv7em-none-eabihf --locked
+      - run: |
+          sizes="$("$(rustc --print sysroot)/lib/rustlib/$(rustc --print host-tuple)/bin/llvm-size" target/thumbv7em-none-eabihf/release/sigroot-nostd-check)"
+          echo "$sizes"
+          printf '### Bare-metal check binary size\n\n```\n%s\n```\n' "$sizes" >> "$GITHUB_STEP_SUMMARY"
 
   msrv:
     runs-on: ubuntu-latest
