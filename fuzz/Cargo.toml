@@ -1,0 +1,52 @@
+[package]
+name = "sigroot-fuzz"
+version = "0.0.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4.13"
+sigroot-eth = { path = "../crates/sigroot-eth", version = "0.1.0", features = [
+	"erc20",
+	"tx-legacy",
+	"tx-eip2930",
+	"tx-eip1559",
+] }
+sigroot-hd = { path = "../crates/sigroot-hd", version = "0.1.0", features = [
+	"bip32",
+	"bip39",
+] }
+
+[workspace]
+members = ["."]
+[[bin]]
+name = "tx"
+path = "fuzz_targets/tx.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "access_list"
+path = "fuzz_targets/access_list.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "erc20"
+path = "fuzz_targets/erc20.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "text"
+path = "fuzz_targets/text.rs"
+test = false
+doc = false
+bench = false

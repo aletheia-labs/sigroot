@@ -10,6 +10,9 @@ version = 2
 allow = ["MIT"]
 confidence-threshold = 0.95
 exceptions = [
+	{ crate = "libfuzzer-sys", allow = [
+		"NCSA",
+	] },
 	{ crate = "subtle", allow = [
 		"BSD-3-Clause",
 	] },
